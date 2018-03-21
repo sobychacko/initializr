@@ -19,8 +19,10 @@ package io.spring.initializr.service.extension;
 import io.spring.initializr.generator.ProjectRequest;
 import io.spring.initializr.metadata.Dependency;
 import io.spring.initializr.metadata.InitializrMetadata;
-
 import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Determine the appropriate Spring Cloud stream dependency to use based on the
@@ -38,6 +40,9 @@ class SpringCloudMessagingRequestPostProcessor
 
 	static final Dependency KAFKA_BINDER = Dependency.withId("cloud-stream-binder-kafka",
 			"org.springframework.cloud", "spring-cloud-stream-binder-kafka");
+
+	static final Dependency KAFKA_STREAMS_BINDER = Dependency.withId("cloud-stream-binder-kafka-streams",
+			"org.springframework.cloud", "spring-cloud-stream-binder-kafka-streams");
 
 	static final Dependency RABBIT_BINDER = Dependency.withId(
 			"cloud-stream-binder-rabbit", "org.springframework.cloud",
@@ -60,16 +65,41 @@ class SpringCloudMessagingRequestPostProcessor
 				|| hasSpringCloudTurbineStream) {
 			if (hasDependencies(request, "amqp")) {
 				request.getResolvedDependencies().add(RABBIT_BINDER);
+				addScsTestDependency(hasSpringCloudStream, hasReactiveSpringCloudStream, request);
 			}
 			if (hasDependencies(request, "kafka")) {
 				request.getResolvedDependencies().add(KAFKA_BINDER);
+				addScsTestDependency(hasSpringCloudStream, hasReactiveSpringCloudStream, request);
+			}
+			if (hasSpringCloudStream && hasDependencies(request, "kafka-streams")) {
+				request.getResolvedDependencies().add(KAFKA_STREAMS_BINDER);
+			}
+
+			if (hasDependencies(request, "kafka")
+					&& hasDependencies(request, "kafka-streams")) {
+				List<Dependency> resolvedDependencies = request.getResolvedDependencies();
+
+
+				Set<Dependency> namesAlreadySeen = new HashSet<>();
+
+				resolvedDependencies.removeIf(p -> !namesAlreadySeen.add(p));
+
+
+				Set<Dependency> set = resolvedDependencies.stream()
+						.collect(Collectors.toCollection(() ->
+								new TreeSet<>(Comparator.comparing(Dependency::getArtifactId))));
+				request.setResolvedDependencies(new ArrayList<>(set));
+
 			}
 		}
-		// Spring Cloud Stream specific
+	}
+
+	// Spring Cloud Stream specific
+	private void addScsTestDependency(boolean hasSpringCloudStream, boolean hasReactiveSpringCloudStream,
+									  ProjectRequest request) {
 		if (hasSpringCloudStream || hasReactiveSpringCloudStream) {
 			request.getResolvedDependencies().add(SCS_TEST);
 		}
 	}
-
 }
 

@@ -19,9 +19,7 @@ package io.spring.initializr.service.extension;
 import io.spring.initializr.generator.ProjectRequest;
 import org.junit.Test;
 
-import static io.spring.initializr.service.extension.SpringCloudMessagingRequestPostProcessor.KAFKA_BINDER;
-import static io.spring.initializr.service.extension.SpringCloudMessagingRequestPostProcessor.RABBIT_BINDER;
-import static io.spring.initializr.service.extension.SpringCloudMessagingRequestPostProcessor.SCS_TEST;
+import static io.spring.initializr.service.extension.SpringCloudMessagingRequestPostProcessor.*;
 
 /**
  * Tests for {@link SpringCloudMessagingRequestPostProcessor}.
@@ -53,6 +51,31 @@ public class SpringCloudMessagingRequestPostProcessorTests
 				.hasSpringBootStarterTest()
 				.hasDependency(SCS_TEST)
 				.hasDependenciesCount(5);
+	}
+
+	@Test
+	public void springCloudStreamWithKafkaStreamsBinder() {
+		ProjectRequest request = createProjectRequest("cloud-stream", "kafka-streams");
+		generateMavenPom(request)
+				.hasDependency(getDependency("cloud-stream"))
+				.hasDependency(getDependency("kafka-streams"))
+				.hasDependency(KAFKA_STREAMS_BINDER)
+				.hasSpringBootStarterTest()
+				.hasDependenciesCount(4);
+	}
+
+	@Test
+	public void springCloudStreamWithKafkaAndKafkaStreamsBinder() {
+		ProjectRequest request = createProjectRequest("cloud-stream", "kafka", "kafka-streams");
+		generateMavenPom(request)
+				.hasDependency(getDependency("cloud-stream"))
+				.hasDependency(getDependency("kafka"))
+				.hasDependency(getDependency("kafka-streams"))
+				.hasDependency(KAFKA_BINDER)
+				.hasDependency(KAFKA_STREAMS_BINDER)
+				.hasSpringBootStarterTest()
+				.hasDependency(SCS_TEST)
+				.hasDependenciesCount(6);
 	}
 
 	@Test

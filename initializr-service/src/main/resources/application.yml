@@ -727,6 +727,19 @@ initializr:
           links:
             - rel: reference
               href: http://docs.spring.io/spring-boot/docs/{bootVersion}/reference/htmlsingle/#boot-features-kafka
+        - name: Kafka Streams
+          id: kafka-streams
+          weight: 80
+          description: Kafka Streams support using Spring Kafka
+          versionRange: 2.0.0.RELEASE
+          groupId: org.springframework.kafka
+          artifactId: spring-kafka
+          starter: false
+          keywords:
+            - streaming
+          links:
+            - rel: reference
+              href: http://docs.spring.io/spring-boot/docs/{bootVersion}/reference/htmlsingle/#boot-features-kafka
         - name: JMS (ActiveMQ)
           id: activemq
           description: Java Message Service API via Apache ActiveMQ
